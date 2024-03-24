@@ -37,49 +37,57 @@ function workLoop(deadline) {
   requestIdleCallback(workLoop)
 }
 requestIdleCallback(workLoop)
-function performUnitOfWork(work) {
-  // 1. 处理dom
-  if (!work.dom) {
-    const dom = (work.dom =
-      work.type === 'TEXT_ELEMENT'
-        ? document.createTextNode('')
-        : document.createElement(work.type))
+function createDom(type) {
+  return type === 'TEXT_ELEMENT'
+    ? document.createTextNode('')
+    : document.createElement(type)
+}
 
-    work.parent.dom.append(dom)
-    // 2. 处理 props
-    work.props &&
-      Object.keys(work.props).forEach(key => {
-        if (key !== 'children') dom[key] = work.props[key]
-      })
-  }
+function updateProps(dom, props) {
+  Object.keys(props).forEach(key => {
+    if (key !== 'children') dom[key] = props[key]
+  })
+}
 
-  // 3. 转换链表，设置好指针
-  const children = work.props.children
+function initChildren(fiber) {
+  const children = fiber.props.children
   children.forEach((child, index) => {
     const newWork = {
       type: child.type,
       props: child.props,
       child: null,
-      parent: work,
+      parent: fiber,
       sibling: null,
       dom: null,
     }
     if (index === 0) {
-      work.child = newWork
+      fiber.child = newWork
     } else {
       children[index - 1].sibling = newWork
     }
   })
+}
+function performUnitOfWork(fiber) {
+  // 1. 处理dom
+  if (!fiber.dom) {
+    const dom = (fiber.dom = createDom(fiber.type))
 
+    fiber.parent.dom.append(dom)
+    // 2. 处理 props
+    updateProps(dom, fiber.props)
+  }
+
+  // 3. 转换链表，设置好指针
+  initChildren(fiber)
   // 4. 返回下一个工作单元
-  if (work.child) {
-    return work.child
+  if (fiber.child) {
+    return fiber.child
   }
 
-  if (work.sibling) {
-    return work.sibling
+  if (fiber.sibling) {
+    return fiber.sibling
   }
-  return work.parent?.sibling
+  return fiber.parent?.sibling
 }
 
 const React = {
