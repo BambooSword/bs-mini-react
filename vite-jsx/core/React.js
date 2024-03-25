@@ -72,6 +72,7 @@ function updateProps(dom, props) {
 
 function initChildren(fiber) {
   const children = fiber.props.children
+  let prevSibling = null
   children.forEach((child, index) => {
     const newWork = {
       type: child.type,
@@ -84,8 +85,9 @@ function initChildren(fiber) {
     if (index === 0) {
       fiber.child = newWork
     } else {
-      children[index - 1].sibling = newWork
+      prevSibling.sibling = newWork
     }
+    prevSibling = newWork
   })
 }
 function performUnitOfWork(fiber) {
@@ -104,11 +106,13 @@ function performUnitOfWork(fiber) {
   if (fiber.child) {
     return fiber.child
   }
-
-  if (fiber.sibling) {
-    return fiber.sibling
+  let fiberParent = fiber
+  while (fiberParent) {
+    if (fiberParent.sibling) {
+      return fiberParent.sibling
+    }
+    fiberParent = fiberParent.parent
   }
-  return fiber.parent?.sibling
 }
 
 const React = {
