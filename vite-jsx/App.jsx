@@ -1,16 +1,18 @@
 import React from './core/React.js'
-function Counter() {
-  return <div> counter: text</div>
+function Counter({ num }) {
+  return <div> counter: {num}</div>
 }
 
-const App = (
-  <div id="app">
-    hello world
-    <Counter />
-    <Counter />
-    <Counter />
-  </div>
-)
+function App() {
+  return (
+    <div id="app">
+      hello world
+      <Counter num={1} />
+      <Counter num={2} />
+      <Counter num={3} />
+    </div>
+  )
+}
 console.log('====================================')
 console.log(App, '==========')
 console.log('====================================')
