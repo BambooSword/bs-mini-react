@@ -1,8 +1,8 @@
 function createTextEl(text) {
   return {
     type: 'TEXT_ELEMENT',
-    children: [],
     props: {
+      children: [],
       nodeValue: text,
     },
   }
@@ -12,10 +12,10 @@ function createElement(el, props, ...children) {
     type: el,
     props: {
       ...props,
+      children: children.map(child => {
+        return typeof child === 'string' ? createTextEl(child) : child
+      }),
     },
-    children: children.map(child => {
-      return typeof child === 'string' ? createTextEl(child) : child
-    }),
   }
 }
 function render(el, container) {
