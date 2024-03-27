@@ -22,24 +22,25 @@ function createElement(el, props, ...children) {
 }
 function render(el, container) {
   console.log('🚀 ~ render ~ el, container):', el, container)
-  nextUnitOfWork = {
+  wipRoot = {
     dom: container,
     props: {
       children: [el],
     },
   }
-  root = nextUnitOfWork
+  nextUnitOfWork = wipRoot
 }
 function update(el, container) {
   console.log('🚀 ~ render ~ el, container):', el, container)
-  nextUnitOfWork = {
+  wipRoot = {
     dom: currentRoot.dom || container,
     props: currentRoot.props || { children: [el] },
     alternate: currentRoot,
   }
-  root = nextUnitOfWork
+  nextUnitOfWork = wipRoot
 }
-let root = null
+// work in progress
+let wipRoot = null
 let currentRoot = null
 let nextUnitOfWork = null
 function workLoop(deadline) {
@@ -48,15 +49,15 @@ function workLoop(deadline) {
     nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
     shouldYield = deadline.timeRemaining() < 1
   }
-  if (!nextUnitOfWork && root) {
-    commitRoot(root)
+  if (!nextUnitOfWork && wipRoot) {
+    commitRoot(wipRoot)
   }
   requestIdleCallback(workLoop)
 }
 function commitRoot() {
-  commitWork(root.child)
-  currentRoot = root
-  root = null
+  commitWork(wipRoot.child)
+  currentRoot = wipRoot
+  wipRoot = null
 }
 function commitWork(fiber) {
   if (!fiber) {
@@ -114,7 +115,7 @@ function updateProps(dom, nextProps, prevProps = {}) {
   })
 }
 
-function initChildren(fiber, children) {
+function reconcileChildren(fiber, children) {
   let oldFiber = fiber.alternate?.child
   let prevSibling = null
   children.forEach((child, index) => {
@@ -158,7 +159,7 @@ function initChildren(fiber, children) {
 function updateFunctionComponent(fiber) {
   const children = [fiber.type(fiber.props)]
   // 3. 转换链表，设置好指针
-  initChildren(fiber, children)
+  reconcileChildren(fiber, children)
 }
 
 function updateHostComponent(fiber) {
@@ -170,7 +171,7 @@ function updateHostComponent(fiber) {
     // 2. 处理 props
     updateProps(dom, fiber.props)
   }
-  initChildren(fiber, fiber.props.children)
+  reconcileChildren(fiber, fiber.props.children)
 }
 
 function performUnitOfWork(fiber) {
