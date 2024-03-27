@@ -43,7 +43,7 @@ function workLoop(deadline) {
   }
   requestIdleCallback(workLoop)
 }
-function commitRoot(root) {
+function commitRoot() {
   commitWork(root.child)
   root = null
 }
@@ -70,7 +70,12 @@ function createDom(type) {
 
 function updateProps(dom, props) {
   Object.keys(props).forEach(key => {
-    if (key !== 'children') dom[key] = props[key]
+    if (key.startsWith('on')) {
+      const eventName = key.toLowerCase().substring(2)
+      dom.addEventListener(eventName, props[key])
+    } else {
+      if (key !== 'children') dom[key] = props[key]
+    }
   })
 }
 
