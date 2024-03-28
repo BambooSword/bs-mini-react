@@ -171,6 +171,10 @@ function reconcileChildren(fiber, children) {
     }
     prevSibling = newFiber
   })
+  while (oldFiber) {
+    deletions.push(oldFiber)
+    oldFiber = oldFiber.sibling
+  }
 }
 function updateFunctionComponent(fiber) {
   const children = [fiber.type(fiber.props)]

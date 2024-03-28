@@ -3,8 +3,14 @@ let count = 10
 let props = { id: '2222' }
 let showBar = false
 function Counter({ num }) {
-  const foo = <div>foo</div>
-  const bar = <p>bar</p>
+  const foo = (
+    <div>
+      foo
+      <div>child1</div>
+      <div>child2</div>
+    </div>
+  )
+  const bar = <div>bar</div>
   function handleShowBar() {
     showBar = !showBar
     React.update()
