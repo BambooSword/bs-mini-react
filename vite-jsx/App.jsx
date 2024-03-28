@@ -3,6 +3,8 @@ let count = 10
 let props = { id: '2222' }
 let showBar = false
 function Counter({ num }) {
+  console.log('counter run')
+  const update = React.update()
   const foo = (
     <div>
       foo
@@ -13,13 +15,13 @@ function Counter({ num }) {
   const bar = <div>bar</div>
   function handleShowBar() {
     showBar = !showBar
-    React.update()
+    update()
   }
   function handleClick() {
     console.log('hello world')
     count++
     props = {}
-    React.update()
+    update()
   }
   return (
     <div {...props}>
@@ -32,6 +34,12 @@ function Counter({ num }) {
 }
 
 function App() {
+  console.log('app run')
+  const update = React.update()
+  function handleClick() {
+    console.log('hello world')
+    update()
+  }
   return (
     <div id="app">
       hello world
