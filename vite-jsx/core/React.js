@@ -146,14 +146,16 @@ function reconcileChildren(fiber, children) {
         alternate: oldFiber,
       }
     } else {
-      newFiber = {
-        type: child.type,
-        props: child.props,
-        child: null,
-        parent: fiber,
-        sibling: null,
-        dom: null,
-        effectTag: 'placement',
+      if (child) {
+        newFiber = {
+          type: child.type,
+          props: child.props,
+          child: null,
+          parent: fiber,
+          sibling: null,
+          dom: null,
+          effectTag: 'placement',
+        }
       }
       if (oldFiber) {
         oldFiber.effectTag = 'deletion'
@@ -167,9 +169,11 @@ function reconcileChildren(fiber, children) {
     if (index === 0) {
       fiber.child = newFiber
     } else {
+      console.log('🚀 ~ children.forEach ~ prevSibling:', prevSibling)
       prevSibling.sibling = newFiber
     }
-    prevSibling = newFiber
+    if (!newFiber) console.log('newFiber', newFiber)
+    if (newFiber) prevSibling = newFiber
   })
   while (oldFiber) {
     deletions.push(oldFiber)

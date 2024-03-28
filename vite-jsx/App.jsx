@@ -25,8 +25,8 @@ function Counter({ num }) {
     <div {...props}>
       counter: {count} {num}
       <button onClick={handleClick}> button</button>
+      {showBar && bar}
       <button onClick={handleShowBar}> showBar</button>
-      <div>{showBar ? bar : foo}</div>
     </div>
   )
 }
