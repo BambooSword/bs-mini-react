@@ -1,10 +1,8 @@
-import React from './core/React.js'
-let count = 10
+import React, { useState } from './core/React.js'
 let props = { id: '2222' }
-let showBar = false
 function Counter({ num }) {
-  console.log('counter run')
-  const update = React.update()
+  const [count, setCount] = useState(0)
+  const [showBar, setShowBar] = useState(false)
   const foo = (
     <div>
       foo
@@ -14,14 +12,12 @@ function Counter({ num }) {
   )
   const bar = <div>bar</div>
   function handleShowBar() {
-    showBar = !showBar
-    update()
+    setShowBar(false)
   }
   function handleClick() {
-    console.log('hello world')
-    count++
     props = {}
-    update()
+    setCount(() => count + 1)
+    setShowBar(true)
   }
   return (
     <div {...props}>

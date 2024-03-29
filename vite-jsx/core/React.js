@@ -46,6 +46,8 @@ let currentRoot = null
 let nextUnitOfWork = null
 let deletions = []
 let wipFiber = null
+let hookIndex = 0
+
 function workLoop(deadline) {
   let shouldYield = false
   while (nextUnitOfWork && !shouldYield) {
@@ -187,6 +189,8 @@ function reconcileChildren(fiber, children) {
 }
 function updateFunctionComponent(fiber) {
   wipFiber = fiber
+  wipFiber.hooks = []
+  hookIndex = 0
   const children = [fiber.type(fiber.props)]
   // 3. 转换链表，设置好指针
   reconcileChildren(fiber, children)
@@ -223,9 +227,37 @@ function performUnitOfWork(fiber) {
   }
 }
 
+function useState(initState) {
+  let oldHook = wipFiber.alternate?.hooks?.[hookIndex]
+  const hook = {
+    state: oldHook ? oldHook.state : initState,
+    queue: [],
+  }
+  const actions = oldHook ? oldHook.queue : []
+  actions.forEach(action => {
+    hook.state = action(hook.state)
+  })
+  const setState = action => {
+    const eagerState =
+      typeof action === 'function' ? action(hook.state) : action
+    if (eagerState === hook.state) return
+    hook.queue.push(typeof action === 'function' ? action : () => action)
+    wipRoot = {
+      dom: currentRoot.dom,
+      props: currentRoot.props,
+      alternate: currentRoot,
+    }
+    nextUnitOfWork = wipRoot
+  }
+  wipFiber.hooks.push(hook)
+  hookIndex++
+  return [hook.state, setState]
+}
 const React = {
   update,
   render,
+  useState,
   createElement,
 }
 export default React
+export { createElement, render, useState, update }
