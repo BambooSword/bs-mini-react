@@ -1,4 +1,4 @@
-import React, { useState } from './core/React.js'
+import React, { useState, useEffect } from './core/React.js'
 let props = { id: '2222' }
 function Counter({ num }) {
   const [count, setCount] = useState(0)
@@ -19,6 +19,18 @@ function Counter({ num }) {
     setCount(() => count + 1)
     setShowBar(true)
   }
+  useEffect(() => {
+    console.log('hi, useEffect only once')
+    return () => {
+      console.log('cleanup 0')
+    }
+  }, [])
+  useEffect(() => {
+    console.log('hi, useEffect')
+    return () => {
+      console.log('cleanup 1')
+    }
+  }, [count])
   return (
     <div {...props}>
       counter: {count} {num}

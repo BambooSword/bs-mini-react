@@ -47,6 +47,7 @@ let nextUnitOfWork = null
 let deletions = []
 let wipFiber = null
 let hookIndex = 0
+let effectHooks = []
 
 function workLoop(deadline) {
   let shouldYield = false
@@ -66,8 +67,45 @@ function commitRoot() {
   deletions.forEach(commitDeletion)
   commitWork(wipRoot.child)
   currentRoot = wipRoot
+  commitEffectHook()
   wipRoot = null
   deletions = []
+}
+
+function commitEffectHook() {
+  function run(fiber) {
+    if (!fiber) return
+    if (!fiber.alternate) {
+      fiber.effectHooks?.forEach(hook => {
+        fiber.effectHook?.callback()
+        hook.cleanup = hook.callback()
+      })
+    } else {
+      fiber.effectHooks?.forEach((newHook, index) => {
+        const oldEffectHook = fiber.alternate.effectHooks[index]
+
+        const needUpdate = oldEffectHook?.deps.some((oldDep, i) => {
+          return oldDep !== newHook.deps[i]
+        })
+        needUpdate && (newHook.cleanup = newHook.callback())
+      })
+    }
+    run(fiber.child)
+    run(fiber.sibling)
+  }
+  function runCleanup(fiber) {
+    if (!fiber) return
+
+    fiber?.alternate?.effectHooks?.forEach(hook => {
+      if (hook.deps.length !== 0) {
+        hook.cleanup && hook.cleanup()
+      }
+    })
+    runCleanup(fiber.child)
+    runCleanup(fiber.sibling)
+  }
+  runCleanup(wipRoot)
+  run(wipRoot)
 }
 
 function commitDeletion(fiber) {
@@ -190,6 +228,7 @@ function reconcileChildren(fiber, children) {
 function updateFunctionComponent(fiber) {
   wipFiber = fiber
   wipFiber.hooks = []
+  effectHooks = []
   hookIndex = 0
   const children = [fiber.type(fiber.props)]
   // 3. 转换链表，设置好指针
@@ -253,11 +292,23 @@ function useState(initState) {
   hookIndex++
   return [hook.state, setState]
 }
+
+function useEffect(callback, deps) {
+  const effectHook = {
+    callback,
+    deps,
+    cleanup: undefined,
+  }
+  effectHooks.push(effectHook)
+
+  wipFiber.effectHooks = effectHooks
+}
 const React = {
   update,
+  useEffect,
   render,
   useState,
   createElement,
 }
 export default React
-export { createElement, render, useState, update }
+export { createElement, render, useState, update, useEffect }
