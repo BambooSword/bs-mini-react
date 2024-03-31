@@ -61,6 +61,9 @@ function workLoop(deadline) {
   if (!nextUnitOfWork && wipRoot) {
     commitRoot(wipRoot)
   }
+  if (nextUnitOfWork && !wipRoot) {
+    wipRoot = nextUnitOfWork
+  }
   requestIdleCallback(workLoop)
 }
 function commitRoot() {

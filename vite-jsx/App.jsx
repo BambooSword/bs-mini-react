@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from './core/React.js'
+
+import List from './component/list.jsx'
+import ListHead from './component/listHead.jsx'
 let props = { id: '2222' }
 function Counter({ num }) {
   const [count, setCount] = useState(0)
@@ -43,15 +46,25 @@ function Counter({ num }) {
 
 function App() {
   console.log('app run')
+  const [listItems, setListItems] = useState([])
   const update = React.update()
   function handleClick() {
     console.log('hello world')
     update()
   }
+  function handleAdd(itemText) {
+    setListItems([...listItems, { id: listItems.length, text: itemText }])
+  }
+  function removeItem(id) {
+    setListItems(listItems.filter(item => item.id !== id))
+  }
   return (
     <div id="app">
-      hello world
-      <Counter num={1} />
+      <h1>to do list</h1>
+      <ListHead setItem={handleAdd} />
+      <List items={listItems} removeItem={removeItem} />
+
+      {/* <Counter num={1} /> */}
     </div>
   )
 }
